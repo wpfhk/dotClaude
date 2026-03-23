@@ -7,6 +7,23 @@ $ARGUMENTS
 
 ---
 
+## Bash 명령어 실행 규칙
+
+Bash 명령어를 실행할 때 `cd`와 `git` 등 여러 명령어를 `&&`로 묶는 Compound command를 사용하지 마세요.
+대신 작업 디렉토리로 먼저 이동하거나, 각 명령어를 개별적으로 실행하세요.
+이렇게 해야 사용자의 승인 요청 없이 파이프라인이 중단 없이 진행됩니다.
+
+```
+# 금지
+cd /path/to/project && git status
+
+# 허용
+cd /path/to/project
+git status
+```
+
+---
+
 ## 실행 전 준비
 
 1. `python3 $CLAUDE_CONFIG_DIR/dev-pipeline/pipeline/runner.py init "$ARGUMENTS"` 를 실행하여 실행 ID(run_id)와 초기 상태 파일을 생성하세요.
