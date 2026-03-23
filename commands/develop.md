@@ -9,7 +9,7 @@ $ARGUMENTS
 
 ## 실행 전 준비
 
-1. `python3 /Users/youngsang.kwon/01_private/locky-agent/pipeline/runner.py init "$ARGUMENTS"` 를 실행하여 실행 ID(run_id)와 초기 상태 파일을 생성하세요.
+1. `python3 $CLAUDE_CONFIG_DIR/dev-pipeline/pipeline/runner.py init "$ARGUMENTS"` 를 실행하여 실행 ID(run_id)와 초기 상태 파일을 생성하세요.
 2. 출력된 `run_id`를 기억하고 이후 모든 단계에서 사용하세요.
 3. `.pipeline/runs/{run_id}/` 디렉토리는 **현재 작업 중인 프로젝트 디렉토리**에 생성됩니다.
 
@@ -30,12 +30,12 @@ subagents:
 ```
 
 플래너 에이전트에게 다음 지시를 전달하세요:
-- `/Users/youngsang.kwon/01_private/locky-agent/agents/prompts/planner_lead.md` 파일의 시스템 프롬프트를 읽어 역할 파악
+- `$CLAUDE_CONFIG_DIR/dev-pipeline/agents/prompts/planner_lead.md` 파일의 시스템 프롬프트를 읽어 역할 파악
 - `context-analyzer` 서브에이전트를 호출하여 현재 프로젝트 코드베이스 분석 수행
 - `task-breaker` 서브에이전트를 호출하여 작업 분할 수행
 - 결과를 `.pipeline/runs/{run_id}/plan.json` 에 저장
 
-Plan 완료 후 `python3 /Users/youngsang.kwon/01_private/locky-agent/pipeline/runner.py advance {run_id} planning` 실행.
+Plan 완료 후 `python3 $CLAUDE_CONFIG_DIR/dev-pipeline/pipeline/runner.py advance {run_id} planning` 실행.
 
 ---
 
@@ -54,12 +54,12 @@ subagents:
 ```
 
 코더 에이전트에게 다음 지시를 전달하세요:
-- `/Users/youngsang.kwon/01_private/locky-agent/agents/prompts/coder_lead.md` 파일의 시스템 프롬프트를 읽어 역할 파악
+- `$CLAUDE_CONFIG_DIR/dev-pipeline/agents/prompts/coder_lead.md` 파일의 시스템 프롬프트를 읽어 역할 파악
 - plan.json의 각 태스크를 `core-developer`에게 병렬 할당
 - 구현 완료 후 `refactor-formatter`로 코드 정리
 - 변경된 파일 목록과 요약을 `.pipeline/runs/{run_id}/code_result.json` 에 저장
 
-Code 완료 후 `python3 /Users/youngsang.kwon/01_private/locky-agent/pipeline/runner.py advance {run_id} coding` 실행.
+Code 완료 후 `python3 $CLAUDE_CONFIG_DIR/dev-pipeline/pipeline/runner.py advance {run_id} coding` 실행.
 
 ---
 
@@ -78,11 +78,11 @@ subagents:
 ```
 
 테스터 에이전트에게 다음 지시를 전달하세요:
-- `/Users/youngsang.kwon/01_private/locky-agent/agents/prompts/tester_lead.md` 파일의 시스템 프롬프트를 읽어 역할 파악
+- `$CLAUDE_CONFIG_DIR/dev-pipeline/agents/prompts/tester_lead.md` 파일의 시스템 프롬프트를 읽어 역할 파악
 - `qa-validator`와 `security-auditor`를 병렬로 실행
 - 결과를 `.pipeline/runs/{run_id}/test_result.json` 에 저장 (status: "pass" | "fail")
 
-Test 완료 후 `python3 /Users/youngsang.kwon/01_private/locky-agent/pipeline/runner.py advance {run_id} testing` 실행.
+Test 완료 후 `python3 $CLAUDE_CONFIG_DIR/dev-pipeline/pipeline/runner.py advance {run_id} testing` 실행.
 
 ---
 
@@ -90,11 +90,11 @@ Test 완료 후 `python3 /Users/youngsang.kwon/01_private/locky-agent/pipeline/r
 
 `test_result.json`의 `status`를 확인하세요:
 
-- **"pass"** → `python3 /Users/youngsang.kwon/01_private/locky-agent/pipeline/runner.py complete {run_id}` 실행 후 최종 결과 보고
+- **"pass"** → `python3 $CLAUDE_CONFIG_DIR/dev-pipeline/pipeline/runner.py complete {run_id}` 실행 후 최종 결과 보고
 - **"fail"** →
   1. `iteration` 카운터를 확인하세요 (최대 3회)
   2. 3회 미만이면: `.pipeline/runs/{run_id}/test_result.json`의 `feedback`을 Coder Lead에게 전달하여 **Stage 2**부터 재실행
-  3. 3회 초과이면: `python3 /Users/youngsang.kwon/01_private/locky-agent/pipeline/runner.py fail {run_id}` 실행 후 실패 보고
+  3. 3회 초과이면: `python3 $CLAUDE_CONFIG_DIR/dev-pipeline/pipeline/runner.py fail {run_id}` 실행 후 실패 보고
 
 ---
 
