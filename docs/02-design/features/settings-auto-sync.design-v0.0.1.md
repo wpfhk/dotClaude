@@ -161,7 +161,7 @@ main() {
 
 ### 3.3 핵심 함수 상세
 
-#### `diff_and_copy(source, dest)`
+#### `diff_and_copy(source, dest, rel_path)`
 
 ```
 1. source 존재 확인 → 없으면 warn 후 skip

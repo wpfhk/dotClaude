@@ -278,7 +278,7 @@ main() {
     cd "$SCRIPT_DIR"
 
     acquire_lock
-    trap 'release_lock; log_error "Interrupted"' INT TERM
+    trap 'release_lock; log_error "Interrupted"; exit 1' INT TERM
     trap 'release_lock' EXIT
 
     load_config
