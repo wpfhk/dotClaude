@@ -67,7 +67,17 @@ Write-Info "디렉토리 준비 중..."
 New-Item -ItemType Directory -Force -Path "$ClaudeDir\commands" | Out-Null
 New-Item -ItemType Directory -Force -Path "$ClaudeDir\skills"   | Out-Null
 
-# ── 5. settings.json 복사 ────────────────────────────────
+# ── 5. CLAUDE.md 복사 ────────────────────────────────────
+Write-Info "CLAUDE.md 복사 중..."
+$claudeMdDest = "$ClaudeDir\CLAUDE.md"
+if (Test-Path $claudeMdDest) {
+    Copy-Item $claudeMdDest "$claudeMdDest.bak" -Force
+    Write-Warn "기존 CLAUDE.md를 CLAUDE.md.bak으로 백업했습니다."
+}
+Copy-Item "$ScriptDir\CLAUDE.md" $claudeMdDest -Force
+Write-Info "CLAUDE.md 복사 완료"
+
+# ── 6. settings.json 복사 ────────────────────────────────
 Write-Info "settings.json 복사 중..."
 $settingsDest = "$ClaudeDir\settings.json"
 if (Test-Path $settingsDest) {
@@ -77,12 +87,17 @@ if (Test-Path $settingsDest) {
 Copy-Item "$ScriptDir\settings.json" $settingsDest -Force
 Write-Info "settings.json 복사 완료"
 
-# ── 6. commands 복사 ─────────────────────────────────────
+# ── 7. statusline-command.sh 복사 (WSL/Git Bash용) ───────
+Write-Info "statusline-command.sh 복사 중..."
+Copy-Item "$ScriptDir\statusline-command.sh" "$ClaudeDir\statusline-command.sh" -Force
+Write-Info "statusline-command.sh 복사 완료 (Git Bash/WSL 환경에서 사용)"
+
+# ── 8. commands 복사 ─────────────────────────────────────
 Write-Info "commands 복사 중..."
 Copy-Item "$ScriptDir\commands\*" "$ClaudeDir\commands\" -Force -Recurse
 Write-Info "commands 복사 완료"
 
-# ── 7. dev-pipeline 복사 ─────────────────────────────────
+# ── 9. dev-pipeline 복사 ─────────────────────────────────
 Write-Info "dev-pipeline 복사 중..."
 $devPipelineDest = "$ClaudeDir\dev-pipeline"
 if (Test-Path $devPipelineDest) {
@@ -94,22 +109,41 @@ if (Test-Path $devPipelineDest) {
 Copy-Item "$ScriptDir\dev-pipeline" "$ClaudeDir\dev-pipeline" -Recurse -Force
 Write-Info "dev-pipeline 복사 완료"
 
-# ── 8. skills 복사 ───────────────────────────────────────
+# ── 10. skills 복사 ───────────────────────────────────────
 Write-Info "skills 복사 중..."
 Copy-Item "$ScriptDir\skills\*" "$ClaudeDir\skills\" -Force -Recurse
 Write-Info "skills 복사 완료"
 
-# ── 9. Lokuma 경로 치환 (SKILL.md 내 절대경로) ───────────
-$lokumaSkill = "$ClaudeDir\skills\lokuma\SKILL.md"
-if (Test-Path $lokumaSkill) {
-    $content = Get-Content $lokumaSkill -Raw -Encoding UTF8
-    $content = $content -replace [regex]::Escape("C:\Users\SMILE\.claude"), $ClaudeDir
-    $content = $content -replace [regex]::Escape("C:/Users/SMILE/.claude"), ($ClaudeDir -replace '\\', '/')
-    Set-Content $lokumaSkill -Value $content -Encoding UTF8 -NoNewline
-    Write-Info "SKILL.md 경로 치환 완료"
+# ── 11. MCP 서버 등록 ────────────────────────────────────
+Write-Info "MCP 서버 등록 중 (context7, shadcn-ui)..."
+
+$mcpList = claude mcp list 2>&1
+
+if ($mcpList -notmatch "context7") {
+    try {
+        claude mcp add context7 -s user -- npx -y @upstash/context7-mcp 2>&1 | Out-Null
+        Write-Info "context7 MCP 등록 완료"
+    } catch {
+        Write-Warn "context7 MCP 등록 실패 — 수동 등록: claude mcp add context7 -s user -- npx -y @upstash/context7-mcp"
+    }
+} else {
+    Write-Info "context7 MCP 이미 등록됨"
 }
 
-# ── 10. 완료 ──────────────────────────────────────────────
+if ($mcpList -notmatch "shadcn") {
+    try {
+        claude mcp add shadcn-ui -s user -- npx -y shadcn@canary mcp 2>&1 | Out-Null
+        Write-Info "shadcn-ui MCP 등록 완료"
+    } catch {
+        Write-Warn "shadcn-ui MCP 등록 실패 — 수동 등록: claude mcp add shadcn-ui -s user -- npx -y shadcn@canary mcp"
+    }
+} else {
+    Write-Info "shadcn-ui MCP 이미 등록됨"
+}
+
+Write-Info "MCP 설정 완료 (playwright, sequential-thinking은 settings.json에서 자동 로드)"
+
+# ── 12. 완료 ──────────────────────────────────────────────
 Write-Host ""
 Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host "  설치 완료!" -ForegroundColor Green
@@ -118,13 +152,21 @@ Write-Host ""
 Write-Host "  설정 위치: $ClaudeDir"
 Write-Host ""
 Write-Host "  설치된 항목:" -ForegroundColor Cyan
+Write-Host "    CLAUDE.md                - 전역 AI 행동 지침"
 Write-Host "    settings.json            - Claude Code 전역 설정"
+Write-Host "    statusline-command.sh    - 상태 표시줄 스크립트"
 Write-Host "    commands\develop.md      - /develop 커스텀 커맨드"
 Write-Host "    dev-pipeline\            - 자동화 파이프라인 엔진"
+Write-Host "    skills\context-check\    - 컨텍스트 진단 스킬"
+Write-Host "    skills\git-commit-push\  - Git 커밋/푸시 스킬"
 Write-Host "    skills\lokuma\           - Lokuma 디자인 인텔리전스"
 Write-Host "    skills\subagent-creator\ - 서브에이전트 생성기"
 Write-Host ""
 Write-Host "  확인 방법:" -ForegroundColor Cyan
 Write-Host "    claude                    # Claude Code 실행"
 Write-Host "    /develop 테스트 요구사항  # 개발 파이프라인 실행"
+Write-Host ""
+Write-Host "  다음 단계 (선택):" -ForegroundColor Cyan
+Write-Host "    Telegram 연동: /telegram:configure"
+Write-Host "    bkit 플러그인: /bkit"
 Write-Host ""

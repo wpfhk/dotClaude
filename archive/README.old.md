@@ -1,18 +1,14 @@
-# my_claude_set
+# dotClaude
 
-Claude Code 전역 설정 및 커스텀 도구 모음입니다. 새 컴퓨터에서 그대로 복원할 수 있습니다.
+Claude Code 전역 설정 및 커스텀 도구 모음입니다.
 
 ## 포함 항목
 
 | 항목 | 설명 |
 |------|------|
-| `CLAUDE.md` | 전역 AI 행동 지침 — PDCA 규칙, 코드 품질 기준 |
-| `settings.json` | Claude Code 전역 설정 — 모델, 플러그인, MCP, 상태 표시줄 |
-| `statusline-command.sh` | 상태 표시줄 스크립트 (ctx%, 토큰, 모델명) |
-| `commands/develop.md` | `/develop` — 계층적 자동화 개발 파이프라인 |
+| `settings.json` | Claude Code 전역 설정 (모델: Sonnet, 마켓플레이스 등) |
+| `commands/develop.md` | `/develop` — 계층적 자동화 개발 파이프라인 커맨드 |
 | `dev-pipeline/` | Planner → Coder → Tester → Reviewer 파이프라인 엔진 |
-| `skills/context-check/` | 컨텍스트 윈도우 진단 스킬 |
-| `skills/git-commit-push/` | Git add→commit→push 자동화 스킬 |
 | `skills/lokuma/` | Lokuma 디자인 인텔리전스 스킬 |
 | `skills/subagent-creator/` | Claude Agent SDK 서브에이전트 생성기 스킬 |
 
@@ -30,13 +26,16 @@ bash setup_mac.sh
 
 ## /develop 사용법
 
+프로젝트 디렉토리에서 Claude Code를 실행한 뒤:
+
 ```
 /develop 로그인 기능을 추가해줘
 /develop :hotfix 결제 버그 수정
 /develop :plan 새로운 대시보드 설계
 ```
 
-Git 분석 → 계획 → 구현 → 테스트 → 리뷰 단계를 자동으로 진행합니다.
+파이프라인은 Git 분석 → 기획 → 구현 → 테스트 → 리뷰 단계를 자동으로 진행하며,
+테스트 실패 시 최대 3회까지 자동으로 재시도합니다.
 
 ## 요구사항
 

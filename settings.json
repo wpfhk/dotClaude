@@ -1,4 +1,18 @@
 {
+  "model": "sonnet",
+  "autoUpdatesChannel": "latest",
+  "skipDangerousModePermissionPrompt": true,
+
+  "statusLine": {
+    "type": "command",
+    "command": "bash $CLAUDE_CONFIG_DIR/statusline-command.sh"
+  },
+
+  "enabledPlugins": {
+    "bkit@bkit-marketplace": true,
+    "telegram@claude-plugins-official": true
+  },
+
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
@@ -6,9 +20,29 @@
         "repo": "anthropics/claude-plugins-official"
       },
       "autoUpdate": true
+    },
+    "bkit-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "popup-studio-ai/bkit-claude-code"
+      }
     }
   },
-  "autoUpdatesChannel": "latest",
-  "skipDangerousModePermissionPrompt": true,
-  "model": "sonnet"
+
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
 }

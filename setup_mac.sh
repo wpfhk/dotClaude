@@ -69,7 +69,16 @@ info "~/.claude 디렉토리 준비 중..."
 mkdir -p "$CLAUDE_DIR/commands"
 mkdir -p "$CLAUDE_DIR/skills"
 
-# ── 5. settings.json 복사 ────────────────────────────────
+# ── 5. CLAUDE.md 복사 ────────────────────────────────────
+info "CLAUDE.md 복사 중..."
+if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
+    cp "$CLAUDE_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md.bak"
+    warn "기존 CLAUDE.md를 CLAUDE.md.bak으로 백업했습니다."
+fi
+cp "$SCRIPT_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+info "CLAUDE.md 복사 완료"
+
+# ── 6. settings.json 복사 ────────────────────────────────
 info "settings.json 복사 중..."
 if [ -f "$CLAUDE_DIR/settings.json" ]; then
     cp "$CLAUDE_DIR/settings.json" "$CLAUDE_DIR/settings.json.bak"
@@ -78,12 +87,18 @@ fi
 cp "$SCRIPT_DIR/settings.json" "$CLAUDE_DIR/settings.json"
 info "settings.json 복사 완료"
 
-# ── 6. commands 복사 ─────────────────────────────────────
+# ── 7. statusline-command.sh 복사 ────────────────────────
+info "statusline-command.sh 복사 중..."
+cp "$SCRIPT_DIR/statusline-command.sh" "$CLAUDE_DIR/statusline-command.sh"
+chmod +x "$CLAUDE_DIR/statusline-command.sh"
+info "statusline-command.sh 복사 완료"
+
+# ── 8. commands 복사 ─────────────────────────────────────
 info "commands 복사 중..."
 cp -r "$SCRIPT_DIR/commands/." "$CLAUDE_DIR/commands/"
 info "commands 복사 완료"
 
-# ── 7. dev-pipeline 복사 ─────────────────────────────────
+# ── 9. dev-pipeline 복사 ─────────────────────────────────
 info "dev-pipeline 복사 중..."
 if [ -d "$CLAUDE_DIR/dev-pipeline" ]; then
     warn "기존 dev-pipeline을 dev-pipeline.bak으로 백업합니다."
@@ -93,20 +108,35 @@ fi
 cp -r "$SCRIPT_DIR/dev-pipeline" "$CLAUDE_DIR/dev-pipeline"
 info "dev-pipeline 복사 완료"
 
-# ── 8. skills 복사 ───────────────────────────────────────
+# ── 10. skills 복사 ───────────────────────────────────────
 info "skills 복사 중..."
 cp -r "$SCRIPT_DIR/skills/." "$CLAUDE_DIR/skills/"
 info "skills 복사 완료"
 
-# ── 9. Lokuma 경로 치환 (SKILL.md 내 Windows 절대경로) ──
-LOKUMA_SKILL="$CLAUDE_DIR/skills/lokuma/SKILL.md"
-if [ -f "$LOKUMA_SKILL" ]; then
-    sed -i '' "s|C:\\\\Users\\\\SMILE\\\\.claude|$CLAUDE_DIR|g" "$LOKUMA_SKILL"
-    sed -i '' "s|C:/Users/SMILE/.claude|$CLAUDE_DIR|g" "$LOKUMA_SKILL"
-    info "SKILL.md 경로 치환 완료"
+# ── 11. MCP 서버 등록 ────────────────────────────────────
+info "MCP 서버 등록 중..."
+
+# context7 (최신 라이브러리 문서)
+if ! claude mcp list 2>/dev/null | grep -q "context7"; then
+    claude mcp add context7 -s user -- npx -y @upstash/context7-mcp 2>/dev/null && \
+        info "context7 MCP 등록 완료" || \
+        warn "context7 MCP 등록 실패 — 수동 등록: claude mcp add context7 -s user -- npx -y @upstash/context7-mcp"
+else
+    info "context7 MCP 이미 등록됨"
 fi
 
-# ── 10. 완료 ──────────────────────────────────────────────
+# shadcn-ui (UI 컴포넌트 레지스트리)
+if ! claude mcp list 2>/dev/null | grep -q "shadcn"; then
+    claude mcp add shadcn-ui -s user -- npx -y shadcn@canary mcp 2>/dev/null && \
+        info "shadcn-ui MCP 등록 완료" || \
+        warn "shadcn-ui MCP 등록 실패 — 수동 등록: claude mcp add shadcn-ui -s user -- npx -y shadcn@canary mcp"
+else
+    info "shadcn-ui MCP 이미 등록됨"
+fi
+
+info "MCP 서버 등록 완료 (playwright, sequential-thinking은 settings.json에서 자동 로드)"
+
+# ── 12. 완료 ──────────────────────────────────────────────
 echo ""
 echo "=============================================="
 echo -e "  ${GREEN}설치 완료!${NC}"
@@ -115,13 +145,21 @@ echo ""
 echo "  설정 위치: $CLAUDE_DIR"
 echo ""
 echo "  설치된 항목:"
+echo "    CLAUDE.md                — 전역 AI 행동 지침"
 echo "    settings.json            — Claude Code 전역 설정"
+echo "    statusline-command.sh    — 상태 표시줄 스크립트"
 echo "    commands/develop.md      — /develop 커스텀 커맨드"
 echo "    dev-pipeline/            — 자동화 파이프라인 엔진"
+echo "    skills/context-check/    — 컨텍스트 진단 스킬"
+echo "    skills/git-commit-push/  — Git 커밋/푸시 스킬"
 echo "    skills/lokuma/           — Lokuma 디자인 인텔리전스"
 echo "    skills/subagent-creator/ — 서브에이전트 생성기"
 echo ""
 echo "  확인 방법:"
 echo "    claude                    # Claude Code 실행"
 echo "    /develop 테스트 요구사항  # 개발 파이프라인 실행"
+echo ""
+echo "  다음 단계 (선택):"
+echo "    Telegram 연동: /telegram:configure"
+echo "    bkit 플러그인: /bkit"
 echo ""
