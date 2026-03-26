@@ -15,6 +15,18 @@ Claude Code 전역 설정 및 커스텀 도구 모음입니다. 새 컴퓨터에
 | `skills/git-commit-push/` | Git add→commit→push 자동화 스킬 |
 | `skills/lokuma/` | Lokuma 디자인 인텔리전스 스킬 |
 | `skills/subagent-creator/` | Claude Agent SDK 서브에이전트 생성기 스킬 |
+| `sync.sh` / `sync.ps1` | 글로벌 설정 자동 동기화 스크립트 |
+| `sync.conf` | 동기화 대상/제외 설정 |
+
+## 설정 동기화
+
+글로벌 Claude Code 설정(`~/.claude/`)을 이 프로젝트에 자동 동기화합니다.
+
+```bash
+bash sync.sh              # 동기화 실행
+bash sync.sh --dry-run    # 변경사항만 확인
+bash sync.sh --install-cron  # 30분 자동 실행 등록
+```
 
 ## 빠른 설치
 

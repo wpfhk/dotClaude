@@ -1,26 +1,13 @@
 {
-  "model": "sonnet",
-  "autoUpdatesChannel": "latest",
-  "skipDangerousModePermissionPrompt": true,
-
   "statusLine": {
     "type": "command",
-    "command": "bash $CLAUDE_CONFIG_DIR/statusline-command.sh"
+    "command": "bash /Users/youngsang.kwon/.claude/statusline-command.sh"
   },
-
   "enabledPlugins": {
     "bkit@bkit-marketplace": true,
     "telegram@claude-plugins-official": true
   },
-
   "extraKnownMarketplaces": {
-    "claude-plugins-official": {
-      "source": {
-        "source": "github",
-        "repo": "anthropics/claude-plugins-official"
-      },
-      "autoUpdate": true
-    },
     "bkit-marketplace": {
       "source": {
         "source": "github",
@@ -28,21 +15,22 @@
       }
     }
   },
-
   "mcpServers": {
+    "playwright": {
+      "command": "/Users/youngsang.kwon/.npm-global/bin/playwright-mcp",
+      "args": []
+    },
     "sequential-thinking": {
       "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ]
-    },
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@latest"
-      ]
     }
-  }
+  },
+  "model": "sonnet",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "teammateMode": "tmux"
 }
